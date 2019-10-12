@@ -1,0 +1,203 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/template/template.xhtml">
+
+    <f:view>
+        <f:metadata>
+            <f:viewParam name="id" value="#{detailCustomerController.customerId}"/>
+            <f:viewAction action="#{detailCustomerController.initNew}" onPostback="false"/>
+        </f:metadata>
+    </f:view>
+    <ui:define name="content">
+        <h:head>
+            <h:outputStylesheet library="css" name="pos.css"/>
+        </h:head>
+        <div class="content-wrapper">
+            <section class="content-header">
+                <h1>Customers<small>View customer detail</small></h1>
+                <ol class="breadcrumb">
+                    <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                    <li class="active">Customers</li>
+                </ol>
+            </section>
+            <section class="content container-fluid">
+                <h:form id="edit-customer-form">
+                    <p:panel>
+                    <p:messages id="customer-msgs" closable="true" globalOnly="true" severity="warning"/>
+                    <p:growl id="customer-growl" globalOnly="true"/>
+                    <div class="container" style="margin-top: 40px; margin-bottom: 40px">
+                        <h:panelGrid id="customer-info" styleClass="col-md-12">
+                            <h:outputLabel value="Personal Information:" style="margin-bottom: 30px"/>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="First Name*"/>
+                                        <b:inputText id="fname" required="true" value="#{detailCustomerController.customer.firstName}">
+                                            <f:validateLength minimum="3" maximum="30"/>
+                                        </b:inputText>
+                                        <p:message for="fname"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Last Name*"/>
+                                        <b:inputText id="lname" required="true" value="#{detailCustomerController.customer.lastName}">
+                                            <f:validateLength minimum="3" maximum="30"/>
+                                        </b:inputText>
+                                        <p:message for="lname"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="12">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Cedula o RNC*"/>
+                                        <p:inputMask id="socialId" mask="999-9999999-9" required="true" value="#{detailCustomerController.customer.socialId}" styleClass="form-control" style="background-color: white;"/>
+                                        <p:message for="socialId"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Email*"/>
+                                        <b:inputText id="email" required="true" value="#{detailCustomerController.customer.email}">
+                                            <f:validateLength minimum="3" maximum="30"/>
+                                        </b:inputText>
+                                        <p:message for="email"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Phone Number*"/>
+                                        <p:inputMask id="phone" value="#{detailCustomerController.customer.phoneNumber}" mask="(999) 999 9999"  required="true" styleClass="form-control" style="background-color: white;"/>
+                                        <p:message for="phone"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Birth Date*"/>
+                                        <b:datepicker id="birth" value="#{detailCustomerController.customer.birthDate}" changeMonth="true" changeYear="true" required="true"/>
+                                        <p:message for="birth"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Gender*"/>
+                                        <p:selectOneRadio id="gender" value="#{detailCustomerController.customer.gender}" required="true">
+                                            <f:selectItem itemLabel="Male" itemValue="MALE"/>
+                                            <f:selectItem itemLabel="Female" itemValue="FEMALE"/>
+                                        </p:selectOneRadio>
+                                        <p:message for="gender"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+
+                            <p:separator/>
+                            <h:outputLabel value="Preferences Information:" style="margin-bottom: 30px"/>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="This user is tax exemption"/>
+                                        <p:selectOneRadio id="tax-exemtion" value="#{detailCustomerController.customer.taxExemption}" converter="javax.faces.Boolean">
+                                            <f:selectItem itemLabel="Yes" itemValue="#{true}"/>
+                                            <f:selectItem itemLabel="No" itemValue="${false}"/>
+                                        </p:selectOneRadio>
+                                        <p:outputLabel value="#{detailCustomerController.customer.taxExemption}"/>
+                                        <p:message for="tax-exemtion"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="This user apply for discounts"/>
+                                        <p:selectOneRadio id="discount" value="#{detailCustomerController.customer.applyDiscount}">
+                                            <f:selectItem itemLabel="Yes" itemValue="#{true}"/>
+                                            <f:selectItem itemLabel="No" itemValue="#{false}"/>
+                                        </p:selectOneRadio>
+                                        <p:message for="discount"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+
+                            <p:separator/>
+                            <h:outputLabel value="Address Information:" style="margin-bottom: 30px"/>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="City"/>
+                                        <b:inputText id="city" value="#{detailCustomerController.customer.city}"/>
+                                        <p:message for="city"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Postal Code"/>
+                                        <b:inputText id="zcode" value="#{detailCustomerController.customer.postalCode}"/>
+                                        <p:message for="zcode"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Country*"/>
+                                        <p:selectOneMenu id="countryId"  required="true" value="#{detailCustomerController.customer.countryId}" style="background-color: white">
+                                            <p:ajax listener="#{detailCustomerController.onChangeCountry}" update="provinceId"/>
+                                            <f:selectItem itemLabel="Select Country" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{detailCustomerController.countries}" var="country" itemLabel="#{country}" itemValue="#{country.id}"/>
+                                        </p:selectOneMenu>
+                                        <p:message for="countryId"/>
+                                    </b:formGroup>
+                                </b:column>
+                                <b:column colMd="6">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Province*"/>
+                                        <p:selectOneMenu id="provinceId" required="true" value="#{detailCustomerController.customer.provinceId}" style="background-color: white">
+                                            <f:selectItem itemLabel="Select Province" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{detailCustomerController.provinces}" var="province" itemLabel="#{province}" itemValue="${province.id}"/>
+                                        </p:selectOneMenu>
+                                        <p:message for="provinceId"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="12">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Address Line 1"/>
+                                        <b:inputText id="addr1" value="#{detailCustomerController.customer.addressLine1}"/>
+                                        <p:message for="addr1"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row>
+                                <b:column colMd="12">
+                                    <b:formGroup>
+                                        <p:outputLabel value="Address Line 2"/>
+                                        <b:inputText id="addr2" value="#{detailCustomerController.customer.addressLine2}"/>
+                                        <p:message for="addr2"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                            <b:row style="margin-top: 30px">
+                                <b:column colMd="12">
+                                    <b:formGroup>
+                                        <b:button value="Cancel" styleClass="pull-left" href="/customers/view/"/>
+                                        <b:commandButton value="Update Information" styleClass="pull-right" look="primary" action="#{detailCustomerController.updateCustomer}" update="edit-customer-form"/>
+                                    </b:formGroup>
+                                </b:column>
+                            </b:row>
+                        </h:panelGrid>
+                    </div>
+                </p:panel>
+                </h:form>
+            </section>
+        </div>
+    </ui:define>
+
+</ui:composition>

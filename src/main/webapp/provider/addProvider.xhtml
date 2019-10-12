@@ -1,0 +1,96 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:b="http://bootsfaces.net/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+	<f:view>
+		<f:metadata>
+			<f:viewAction action="#{providersController.initNew}" />
+			<f:viewAction action="#{posController.initNew}" />
+		</f:metadata>
+	</f:view>
+
+	<ui:define name="content">
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>Add Provider</h1>
+				<ol class="breadcrumb">
+					<li><a href="/dashboard/dashboard.xhtml"><i class="fa fa-dashboard"></i>
+							Home</a></li>
+					<li class="active">Dashboard</li>
+				</ol>
+			</section>
+			<section class="content container-fluid">
+
+
+
+				<h:form id="product">
+					<p:growl id="mensaje" showDetail="true" globalOnly="true"
+						life="3000">
+						<p:autoUpdate />
+					</p:growl>
+					<b:messages id="msg" />
+					<b:panel id="panel" collapsible="false">
+						<b:container>
+							<h:outputText value="Provider Information:"
+								style="margin-bottom: 30px" />
+
+							<b:row>
+								<b:column colMd="6">
+									<b:formGroup>
+										<p:outputLabel value="Nombre del Proveedor: " />
+										<b:inputText id="name"
+											value="#{providersController.providers.providerName}"
+											required="true" />
+										<b:message for="name" />
+									</b:formGroup>
+								</b:column>
+
+								<b:column colMd="6">
+									<b:formGroup>
+										<p:outputLabel value="RNC o Cedula: " />
+										<b:inputText id="cedula"
+											value="#{providersController.providers.rncSocialId}"
+											required="true" />
+
+										<b:message for="cedula" />
+									</b:formGroup>
+								</b:column>
+
+							</b:row>
+
+							<b:row>
+								<b:column colMd="12">
+									<b:formGroup>
+										<p:outputLabel value="Email: " />
+										<b:inputText id="email"
+											value="#{providersController.providers.email}"
+											required="true" />
+										<b:message for="email" />
+									</b:formGroup>
+								</b:column>
+							</b:row>
+
+							<b:row style="margin-top: 30px">
+								<p:separator/>
+								<b:column colMd="12">
+									<b:formGroup>
+										<b:commandButton value="Cancelar" icon="glyphicon-remove"
+														 look="danger" styleClass="btn-primary" />
+										<b:commandButton value="Guardar" icon="glyphicon-remove"
+														 styleClass="pull-right btn-primary"
+														 actionListener="#{providersController.guardar}"
+														 update="product" />
+									</b:formGroup>
+								</b:column>
+							</b:row>
+						</b:container>
+
+					</b:panel>
+				</h:form>
+			</section>
+		</div>
+	</ui:define>
+</ui:composition>

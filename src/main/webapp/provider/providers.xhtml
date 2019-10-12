@@ -1,0 +1,228 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:b="http://bootsfaces.net/ui"
+	xmlns:P="http://java.sun.com/jsf/html"
+	template="/WEB-INF/template/template.xhtml">
+
+	<f:view>
+		<f:metadata>
+			<f:viewAction action="#{listProvidersController.initNew}" />
+		</f:metadata>
+	</f:view>
+
+	<ui:define name="content">
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>Providers View</h1>
+				<ol class="breadcrumb">
+					<li><a href="/dashboard/dashboard.xhtml"><i class="fa fa-dashboard"></i>
+							Home</a></li>
+					<li class="active">Dashboard</li>
+				</ol>
+			</section>
+			<section class="content container-fluid">
+				<h:form id="provider-form">
+
+						<h:panelGrid id="grid" cellpadding="5" columns="2"
+							style="margin-bottom:10px">
+
+							<p:dataTable id="provider" var="pro" value="#{listProvidersController.list}"
+								rows="10" paginator="true"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								rowsPerPageTemplate="5,10,15">
+
+								<p:column headerText="Id">
+									<h:outputText value="#{pro.providerId}" />
+								</p:column>
+
+								<p:column headerText="Nombre del Proveedor">
+									<h:outputText value="#{pro.providerName}" />
+								</p:column>
+
+								<p:column headerText="Correo">
+									<h:outputText value="#{pro.email}" />
+								</p:column>
+
+								<p:column headerText="Cedula o RNC">
+									<h:outputText value="#{pro.rncSocialId}" />
+								</p:column>
+
+								<p:column>
+									<b:commandLink icon="glyphicon-edit"
+										style="padding-right: 15px;" tooltip="Editar"
+										actionListener="#{providersController.buscarPorId(pro.providerId)}"
+										oncomplete="PF('dialogoEditar').show();" update=":edit-form" />
+
+									<b:commandLink icon="glyphicon-trash" tooltip="Eliminar"
+										style="color: red;" oncomplete="PF('dialogDelete').show();"
+										actionListener="#{providersController.buscarPorId(pro.providerId)}"
+										update=":form-delete" />
+										
+								</p:column>
+
+							</p:dataTable>
+						</h:panelGrid>
+
+				</h:form>
+
+				<b:form id="edit-form">
+					<p:dialog id="dlgEditar" widgetVar="dialogoEditar"
+						showEffect="drop" header="Productos" resizable="false"
+						modal="true" height="470" width="700">
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+								<p:outputLabel value="Nombre del Proveedor: " />
+								<b:inputText id="name"
+											 value="#{providersController.providers.providerName}"
+											 required="true" />
+								<b:message for="name" />
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+								<p:outputLabel value="RNC o Cedula: " />
+								<b:inputText id="cedula"
+											 value="#{providersController.providers.rncSocialId}"
+											 required="true" />
+
+								<b:message for="cedula" />
+							</b:formGroup>
+
+						</b:row>
+
+						<b:row>
+							<b:column colMd="12">
+								<b:formGroup>
+									<p:outputLabel value="Email: " />
+									<b:inputText id="email"
+												 value="#{providersController.providers.email}"
+												 required="true" />
+									<b:message for="email" />
+								</b:formGroup>
+							</b:column>
+						</b:row>
+
+						<p:separator />
+						<h:outputText value="Address Information:"
+									  style="margin-bottom: 30px" />
+
+						<b:row>
+							<b:column colMd="6">
+								<b:formGroup>
+									<p:outputLabel value="City" />
+									<b:inputText id="city"
+												 value="" />
+									<p:message for="city" />
+								</b:formGroup>
+							</b:column>
+							<b:column colMd="6">
+								<b:formGroup>
+									<p:outputLabel value="Postal Code" />
+									<b:inputText id="zcode"
+												 value="" />
+									<p:message for="zcode" />
+								</b:formGroup>
+							</b:column>
+						</b:row>
+						<b:row>
+							<b:column colMd="6">
+								<b:formGroup>
+									<p:outputLabel value="Country" />
+									<p:selectOneMenu id="country"
+													 value=""
+													 style="background-color: white">
+										<p:ajax update="province" />
+										<f:selectItem itemLabel="Select Country" itemValue=""
+													  noSelectionOption="true" />
+										<f:selectItems value=""
+													   var="country" itemLabel=""
+													   itemValue="" />
+									</p:selectOneMenu>
+									<p:message for="country" />
+								</b:formGroup>
+							</b:column>
+							<b:column colMd="6">
+								<b:formGroup>
+									<p:outputLabel value="Province" />
+									<p:selectOneMenu id="province"
+													 value=""
+													 style="background-color: white">
+										<f:selectItem itemLabel="Select Province" itemValue=""
+													  noSelectionOption="true" />
+										<f:selectItems value=""
+													   var="province" itemValue=""
+													   itemLabel="" />
+									</p:selectOneMenu>
+									<p:message for="province" />
+								</b:formGroup>
+							</b:column>
+						</b:row>
+						<b:row>
+							<b:column colMd="12">
+								<b:formGroup>
+									<p:outputLabel value="Address Line 1" />
+									<b:inputText id="addr1"
+												 value="" />
+									<p:message for="addr1" />
+								</b:formGroup>
+							</b:column>
+						</b:row>
+						<b:row>
+							<b:column colMd="12">
+								<b:formGroup>
+									<p:outputLabel value="Address Line 2" />
+									<b:inputText id="addr2"
+												 value="" />
+									<p:message for="addr2" />
+								</b:formGroup>
+							</b:column>
+						</b:row>
+
+
+						<f:facet name="footer">
+							<b:commandButton icon="glyphicon-remove" look="danger"
+								tooltip="Cancelar" onclick="PF('dialogoEditar').hide();" />
+
+							<b:commandButton icon="glyphicon-save" look="primary"
+								styleClass="pull-right" tooltip="Actualizar"
+								actionListener="#{providersController.actualizar}"
+								oncomplete="PF('dialogoEditar').hide();"
+								update=":provider-form"/>
+						</f:facet>
+					</p:dialog>
+				</b:form>
+
+				<b:form id="form-delete">
+					<p:dialog id="dlgDelete" widgetVar="dialogDelete" showEffect="drop"
+						resizable="false" modal="true" width="600">
+
+						<f:facet name="header">
+							<h3>Remove Product</h3>
+						</f:facet>
+
+						<div style="font-size: 20px">
+							<div>
+								<h:outputText value="Desea eliminar este proveedor?" />
+							</div>
+							<div class="form-group" style="padding-top: 40px">
+								<p:separator />
+								<b:commandButton  value="No"
+									 onclick="PF('dialogDelete').hide();" />
+
+								<b:commandButton icon="glyphicon-remove" look="danger"
+									styleClass="pull-right" value="Si"
+									oncomplete="PF('dialogDelete').hide();"
+									actionListener="#{providersController.eliminar}"
+									update=":provider-form"/>
+							</div>
+						</div>
+
+
+
+					</p:dialog>
+				</b:form>
+			</section>
+		</div>
+	</ui:define>
+</ui:composition>

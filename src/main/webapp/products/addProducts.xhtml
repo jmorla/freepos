@@ -1,0 +1,186 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:b="http://bootsfaces.net/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+	<f:view>
+		<f:metadata>
+			<f:viewAction action="#{productsController.initNew}" />
+			<f:viewAction action="#{categoriaController.initNew}" />
+			<f:viewAction action="#{providersController.initNew}" />
+		</f:metadata>
+	</f:view>
+
+	<ui:define name="content">
+		<h:head>
+
+		</h:head>
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>Add Products</h1>
+				<ol class="breadcrumb">
+					<li><a href="/dashboard/dashboard.xhtml"><i class="fa fa-dashboard"></i>
+							Home</a></li>
+					<li class="active">Dashboard</li>
+				</ol>
+			</section>
+			<section class="content container-fluid">
+
+
+				<b:row>
+					<b:column>
+						<h:form id="product">
+							<p:growl id="mensaje" showDetail="true" globalOnly="true"
+								life="3000">
+								<p:autoUpdate />
+							</p:growl>
+							<b:panel id="panel" collapsible="false">
+								<b:container>
+									<b:row>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Nombre Producto: " />
+											<b:inputText id="producto"
+												value="#{productsController.product.name}" required="true" />
+											<b:message for="producto" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Marca de Producto: " />
+											<b:inputText id="marca"
+												value="#{productsController.product.brand}" required="true" />
+											<b:message for="marca" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Codigo de barra: " />
+											<b:inputText id="barcode"
+												value="#{productsController.product.barcode}"
+												required="true" />
+											<b:message for="barcode" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Precio al costo: " />
+											<p:inputNumber id="pcosto" inputStyleClass="form-control"
+												value="#{productsController.product.purchasePrice}"
+												required="true" />
+											<b:message for="pcosto" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Precio venta: " />
+											<p:inputNumber id="pventa" inputStyleClass="form-control"
+												value="#{productsController.product.salePrice}"
+												required="true" />
+											<b:message for="pventa" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Stock: " />
+											<p:inputNumber id="stocks" inputStyleClass="form-control"
+												value="#{productsController.product.stocks}" required="true" />
+											<b:message for="stocks" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="ITBIS: " />
+											<p:inputNumber id="itbis" inputStyleClass="form-control"
+												value="#{productsController.product.itbis}" required="true" />
+											<b:message for="itbis" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Categoria: " />
+											<b:row>
+												<b:column colMd="10">
+													<b:selectOneMenu id="cat"
+														value="#{productsController.category.id}" required="true">
+														<f:selectItem itemLabel="Categoria" />
+														<f:selectItems value="#{categoriaController.list}"
+															var="cat" itemLabel="#{cat.name}" itemValue="#{cat.id}" />
+													</b:selectOneMenu>
+													<b:message for="cat" />
+												</b:column>
+												<b:column colMd="2">
+													<b:commandButton icon="glyphicon-plus" look="primary"
+														tooltip="Agregar"
+														oncomplete="PF('dialogoCategoria').show();"
+														update=":formCategoria" />
+												</b:column>
+											</b:row>
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Descripcion: " />
+											<b:inputTextarea id="descripcion"
+												value="#{productsController.product.description}"
+												required="true" />
+											<b:message for="descripcion" />
+										</b:formGroup>
+
+										<b:formGroup styleClass="col-md-6">
+											<p:outputLabel value="Proveedor: " />
+											<b:selectOneMenu id="proveedor"
+												value="#{productsController.providers.providerId}"
+												required="true">
+												<f:selectItem itemLabel="Providers" />
+												<f:selectItems value="#{listProvidersController.list}" var="pro"
+													itemLabel="#{pro.providerName}"
+													itemValue="#{pro.providerId}" />
+											</b:selectOneMenu>
+											<b:message for="proveedor" />
+										</b:formGroup>
+									</b:row>
+									<b:row style="margin-top: 30px">
+									<p:separator/>
+										<b:column colMd="12">
+											<b:formGroup>
+												<b:commandButton value="Cancelar" icon="glyphicon-remove"
+													look="danger" actionListener="#{productsController.cancelar}" styleClass="btn-primary" />
+												<b:commandButton value="Guardar" icon="glyphicon-save"
+													styleClass="pull-right btn-primary"
+													actionListener="#{productsController.guardar}"
+													update="product" />
+											</b:formGroup>
+										</b:column>
+									</b:row>
+								</b:container>
+							</b:panel>
+						</h:form>
+
+						<b:form id="formCategoria">
+							<p:dialog id="dlgCategoria" widgetVar="dialogoCategoria"
+								showEffect="drop" header="Categoria" resizable="false"
+								modal="true" height="300" width="700">
+								<b:formGroup>
+									<p:outputLabel value="Nombre de la categoria" />
+									<b:inputText value="#{categoriaController.category.name}" />
+								</b:formGroup>
+
+								<b:formGroup>
+									<p:outputLabel value="Descripcion de la categoria" />
+									<b:inputTextarea
+										value="#{categoriaController.category.description}" />
+								</b:formGroup>
+
+								<f:facet name="footer">
+									<b:commandButton icon="glyphicon-remove" look="danger"
+										onclick="PF('dialogoCategoria').hide();" />
+										
+									<b:commandButton icon="glyphicon-save" styleClass="pull-right"
+										look="primary" actionListener="#{categoriaController.guardar}"
+										oncomplete="PF('dialogoCategoria').hide();"
+										update=":product:panel:cat" />
+								</f:facet>
+							</p:dialog>
+						</b:form>
+					</b:column>
+				</b:row>
+
+			</section>
+		</div>
+	</ui:define>
+</ui:composition>

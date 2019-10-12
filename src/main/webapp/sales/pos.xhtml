@@ -1,0 +1,458 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:b="http://bootsfaces.net/ui" xmlns:o="http://java.sun.com/jsf/html"
+                template="/WEB-INF/template/template.xhtml">
+
+    <f:view>
+        <f:metadata>
+            <f:viewAction action="#{posController.initNew}" onPostback="false"/>
+        </f:metadata>
+    </f:view>
+    <ui:define name="content">
+            <h:head>
+                <h:outputStylesheet library="css" name="pos.css"/>
+            </h:head>
+            <div class="content-wrapper">
+                <section class="content-header">
+                    <h1>POS<small></small></h1>
+                    <ol class="breadcrumb">
+                        <li><a href="/dashboard/dashboard.xhtml"><i class="fa fa-dashboard"></i> Home</a></li>
+                        <li class="active">Dashboard</li>
+                    </ol>
+                </section>
+                <section class="content container-fluid">
+                    <b:row>
+                        <b:column colMd="7">
+                            <div class="box box-default" style="height: 45em;">
+                                <h:form id="items">
+                                    <div class="box-header">
+                                        <b:row>
+                                            <b:column colMd="5">
+                                                <div class="input-group">
+                                                    <b:inputText placeholder="Search by Barcode or Scanner" value="#{posController.barcode}"/>
+                                                    <div class="input-group-btn">
+                                                        <b:commandButton look="default" icon="glyphicon glyphicon-search" tooltip="Search"
+                                                                         actionListener="#{posController.findProductByBarcode}" update=":items"/>
+                                                    </div>
+                                                </div>
+                                            </b:column>
+                                            <b:column colMd="7">
+                                                <p:autoComplete id="customer" placeholder="Find Customer by Name or Social Id"  inputStyleClass="col-md-12 form-control" styleClass="col-md-10"
+                                                    completeMethod="#{posController.completeCustomer}" converter="customerConverter" value="#{posController.customer}" var="customer" itemLabel="#{customer.fullName.concat(' ').concat(customer.socialId)}" itemValue="#{customer}" forceSelection="true">
+                                                </p:autoComplete>
+                                                <b:button icon="glyphicon-plus" look="success" onclick="PF('customer-dialog').show()"/>
+                                            </b:column>
+                                        </b:row>
+                                    </div>
+                                    <p:growl id="order-msg"/>
+                                    <div class="box-body">
+                                        <div>
+                                            <table class="table" >
+                                                <thead>
+                                                <tr class="active">
+                                                    <th class="col-md-4">Product</th>
+                                                    <th class="col-md-2">Price</th>
+                                                    <th class="col-md-2">QTY</th>
+                                                    <th class="col-md-2">ITBIS</th>
+                                                    <th>Total</th>
+                                                </tr>
+                                                </thead>
+                                                <!--<tbody>-->
+                                                    <!--<tr>-->
+                                                        <!--<td></td>-->
+                                                    <!--</tr>-->
+                                                <!--</tbody>-->
+                                            </table>
+                                            <div class="items" style="height: 300px; overflow-y: auto">
+                                                <table class="table">
+                                                    <tbody>
+                                                    <p:outputPanel rendered="#{posController.items.isEmpty()}">
+                                                        <div class="empty-order">
+                                                            <label>Empty List</label><span class="helper"> (Select product)</span>
+                                                        </div>
+                                                    </p:outputPanel>
+                                                    <p:commandButton style="display: none"/>
+                                                    <p:repeat value="#{posController.items}" var="items" varStatus="s">
+                                                        <tr style="background-color: white">
+                                                            <td class="col-md-4">
+                                                                <b:commandLink icon="glyphicon glyphicon-remove" style="color: red"
+                                                                                 actionListener="#{posController.removeOrder(items.productId)}"
+                                                                                 update="items" /> #{items.name}
+                                                            </td>
+                                                            <td class="col-md-2">
+                                                                $RD<h:outputText value="#{items.price}">
+                                                                    <f:convertNumber pattern="#0.00"/>
+                                                                </h:outputText>
+                                                            </td>
+                                                            <td class="quantity align-center">
+                                                                <div class="input-group">
+                                                                    <div class="input-group-btn">
+                                                                        <b:commandButton actionListener="#{posController.decreaseOrderQuantity(items.productId)}"
+                                                                                         look="default" icon="glyphicon glyphicon-minus" update=":items"/>
+                                                                    </div>
+                                                                    <p:inputNumber disabled="true" inputStyle="width: 50px" maxValue="999" decimalPlaces="0" minValue="0" value="#{items.quantity}"/>
+                                                                    <div class="input-group-btn">
+                                                                        <b:commandButton actionListener="#{posController.raiseOrderQuantity(items.productId)}"
+                                                                                         look="default" icon="glyphicon glyphicon-plus" update=":items"/>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td class="col-md-2">
+                                                                $RD<h:outputText value="#{(items.total * items.itbis) / 100}">
+                                                                <f:convertNumber pattern="#0.00"/>
+                                                            </h:outputText>
+                                                            </td>
+                                                            <td>
+                                                                $RD<h:outputText value="#{items.total + ((items.total * items.itbis) / 100)}">
+                                                                    <f:convertNumber pattern="#0.00"/>
+                                                                </h:outputText>
+                                                            </td>
+                                                        </tr>
+                                                    </p:repeat>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p:outputPanel id="totals">
+                                        <div class="box-footer">
+                                            <div class="row">
+
+                                                <div class="col-md-9 col-md-offset-3">
+                                                    <table class="table table-bordered">
+                                                        <tbody>
+                                                        <tr>
+                                                            <td class="active col-md-6"><p:outputLabel value="Subtotal"/></td>
+                                                            <td class="col-md-6">
+                                                                $<p:outputLabel value="#{posController.subtotal}">
+                                                                <f:convertNumber pattern="#0.00"/>
+                                                            </p:outputLabel>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="active col-md-6"><p:outputLabel value="ITBIS"/></td>
+                                                            <td class="col-md-6">$<p:outputLabel value="#{posController.itbis}">
+                                                                <f:convertNumber pattern="#0.00"/>
+                                                            </p:outputLabel></td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="active col-md-6"><p:outputLabel value="Discount"/></td>
+                                                            <td class="col-md-6">
+                                                                <div class="input-group-btn">
+                                                                    <p:inputNumber id="discount" value="#{posController.discount}"
+                                                                                   maxValue="${posController.subtotal + posController.itbis}"
+                                                                                   minValue="0"
+                                                                                   decimalPlaces="2">
+                                                                        <p:ajax event="blur" listener="#{posController.calculateTotals}" update="@form"/>
+                                                                    </p:inputNumber>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="active total-label col-md-6"><span><p:outputLabel value="Total"/></span></td>
+                                                            <td class="total-price col-md-6"><span>$<p:outputLabel value="#{posController.total}">
+                                                    <f:convertNumber pattern="#0.00"/>
+                                                </p:outputLabel></span></td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <b:commandButton look="danger" value="Cancel" colMd="6" colSm="6" disabled="#{posController.total==0}"
+                                                                     iconAwesome="fa-credit-cancel" type="button" onclick="PF('cancel-dialog').show();"/>
+
+
+                                                    <p:commandButton value="Payment" styleClass="col-md-5 btn-success fa fa-credit-card"
+                                                                     oncomplete="PF('sell-dialog').show();" disabled="#{posController.total==0}"
+                                                                     actionListener="#{posController.generatePaymentDetails}" update="formPaymentDatail"/>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </p:outputPanel>
+                                </h:form>
+                            </div>
+                        </b:column>
+                        <b:column colMd="5">
+                            <h:form id="search-product" style="margin-bottom: 10px">
+                                <div class="box box-default">
+                                    <div class="box-header" style="overflow-x: auto">
+                                        <b:buttonGroup>
+                                            <b:commandButton icon="glyphicon glyphicon-tags" tooltip="All categories"
+                                                             size="md" look="success" styleClass="category" update=":productForm"
+                                                             actionListener="#{posController.findAllProducts}"/>
+
+                                            <p:repeat value="#{posController.categories}" var="category">
+                                                <b:commandButton size="md" value="#{category.name}" styleClass="category"
+                                                                 actionListener="#{posController.findProductsByCategory(category.id)}" update=":productForm"/>
+                                            </p:repeat>
+                                        </b:buttonGroup>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="input-group">
+                                            <b:inputText placeholder="Search product" value="#{posController.productName}"/>
+                                            <div class="input-group-btn">
+                                                <b:commandButton look="default" icon="glyphicon glyphicon-search" tooltip="Search"
+                                                actionListener="#{posController.findProductsByName}" update=":productForm"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </h:form>
+                            <h:form id="productForm">
+                                    <b:row styleClass="product-list" style="overflow-y:auto; max-height:550px">
+                                        <p:repeat value="#{posController.products}" var="product">
+                                            <p:commandLink actionListener="#{posController.addOrder(product.id)}" update=":items">
+                                                <b:panel colMd="6" style="border-shadow: none">
+                                                    <b:row>
+                                                        <b:column colMd="4">
+                                                            <img src="#{product.photoUrl}"  style="max-width: 60px; max-height: 60px; height: 60px; width: 60px"/>
+                                                        </b:column>
+                                                        <b:column colMd="8">
+                                                            <p:outputLabel value="#{product.name}"/><br/>
+                                                            RD$:
+                                                            <h:outputText value="#{product.salePrice}">
+                                                                <f:convertNumber pattern="#0.00"/>
+                                                            </h:outputText>
+                                                        </b:column>
+                                                    </b:row>
+                                                </b:panel>
+                                            </p:commandLink>
+                                        </p:repeat>
+                                    </b:row>
+                                </h:form>
+                        </b:column>
+                    </b:row>
+                </section>
+            </div>
+
+        <!--dialogs-->
+        <h:form id="formPaymentDatail">
+            <p:dialog widgetVar="sell-dialog" width="600" modal="true" resizable="false" showEffect="drop">
+               <f:facet name="header">
+                <h3>Add Pay</h3>
+               </f:facet>
+                <div style="font-size: 20px">
+                    <div class="form-group" style="padding-bottom: 40px">
+                        <h:outputText value="Customer:" styleClass="col-md-6"/>
+                        <h:outputText value="#{posController.paymentDetails.customerName}" styleClass="col-md-6" style="font-weight: bold"/>
+                    </div>
+                    <div class="form-group" style="padding-bottom: 40px; display: block">
+                        <h:outputText value="#{posController.paymentDetails.itemsCount} Items" styleClass="col-md-offset-6 col-md-6" style="font-weight: bold"/>
+                    </div>
+                    <div class="form-group" style="padding-bottom: 40px; display: block" >
+                        <h:outputText value="Payment Method:" styleClass="col-md-6"/>
+                        <b:selectOneMenu colSm="5" value="#{posController.paymentDetails.paymentMethod}" converter="paymentMethodConverter">
+                            <f:selectItem itemLabel="Cash" itemValue="CASH"/>
+                            <f:selectItem itemLabel="Cradit card" itemValue="CREADIT CARD"/>
+                            <f:selectItem itemLabel="Cheque" itemValue="CHEQUE"/>
+                        </b:selectOneMenu>
+                    </div>
+                    <div class="form-group" style="padding-bottom: 40px; display: block">
+                        <h:outputText value="Total:" styleClass="col-md-6"/>
+                        <span style="font-weight: bold" class="col-md-6">$<h:outputText value="#{posController.paymentDetails.total}" >
+                            <f:convertNumber pattern="#0.00"/>
+                        </h:outputText></span>
+                    </div>
+                    <div class="form-group" style="padding-bottom: 40px; display: block">
+                        <h:outputText value="Paid:" styleClass="col-md-6"/>
+                        <p:inputNumber styleClass="col-md-4" value="#{posController.paymentDetails.paid}"/>
+                    </div>
+                    <div class="form-group" style="font-size: 25px">
+                        <h:outputText value="Change:" styleClass="col-md-6"/>
+                        <h:outputText value="#{posController.paymentDetails.change}" styleClass="col-md-6" style="font-weight: bold">
+                            <f:convertNumber pattern="#0.00"/>
+                        </h:outputText>
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <p:commandButton value="Cancel" styleClass="btn btn-cancel pull-left" oncomplete="PF('sell-dialog').hide()"/>
+                    <p:commandButton value="Submit" styleClass="btn btn-primary pull-right" update=":form-invoice" oncomplete="PF('invoice-dialog').show();PF('sell-dialog').hide();"/>
+                </f:facet>
+            </p:dialog>
+        </h:form>
+
+        <h:form>
+            <p:dialog widgetVar="cancel-dialog" width="600" modal="true" resizable="false" showEffect="drop">
+                <f:facet name="header">
+                    <h3>Cancel Orders</h3>
+                </f:facet>
+                <div style="font-size: 20px">
+                    <div>
+                        <h:outputText value="Seguro que desea eliminar esta venta"/>
+                    </div>
+                    <div class="form-group" style="padding-top: 40px">
+                        <p:separator/>
+                        <p:commandButton value="Atras" styleClass="btn btn-default pull-left" oncomplete="PF('cancel-dialog').hide()"/>
+                        <p:commandButton value="Cancelar" styleClass="btn btn-danger pull-right" actionListener="#{posController.cancelOrders}" update="items"
+                                         oncomplete="PF('cancel-dialog').hide()"/>
+                    </div>
+                </div>
+            </p:dialog>
+        </h:form>
+
+        <b:form id="form-customer">
+            <p:dialog id="dlgCustomer" widgetVar="customer-dialog" showEffect="drop" header="#{msg['post.customer.add_new_customer']}" draggable="false" resizable="false" modal="true" width="700" height="400">
+               <h:panelGrid id="customer-info" styleClass="col-md-12">
+                   <p:messages id="customer-msgs" severity="warn"/>
+                   <p:growl id="customer-growl" globalOnly="true"/>
+                <b:row>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="First Name"/>
+                            <b:inputText id="fname" required="true" value="#{posController.customerDTO.firstName}">
+                                <f:validateLength minimum="3" maximum="30"/>
+                            </b:inputText>
+                            <p:message for="fname"/>
+                        </b:formGroup>
+                    </b:column>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="Last Name"/>
+                            <b:inputText id="lname" required="true" value="#{posController.customerDTO.lastName}">
+                                <f:validateLength minimum="3" maximum="30"/>
+                            </b:inputText>
+                            <p:message for="lname"/>
+                        </b:formGroup>
+                    </b:column>
+                </b:row>
+                <b:row>
+                    <b:column colMd="12">
+                        <b:formGroup>
+                            <p:outputLabel value="Cedula o RNC"/>
+                            <p:inputMask id="socialId" mask="999-9999999-9" required="true" value="#{posController.customerDTO.socialId}" styleClass="form-control" style="background-color: white;"/>
+                            <p:message for="socialId"/>
+                        </b:formGroup>
+                    </b:column>
+                </b:row>
+                <b:row>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="Email"/>
+                            <b:inputText id="email" required="true" value="#{posController.customerDTO.email}">
+                                <f:validateLength minimum="3" maximum="30"/>
+                            </b:inputText>
+                            <p:message for="email"/>
+                        </b:formGroup>
+                    </b:column>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="Phone Number"/>
+                            <p:inputMask id="phone" value="#{posController.customerDTO.phoneNumber}" mask="(999) 999 9999"  required="true" styleClass="form-control" style="background-color: white;"/>
+                            <p:message for="phone"/>
+                        </b:formGroup>
+                    </b:column>
+                </b:row>
+                <b:row>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="Birth Date"/>
+                            <b:datepicker id="birth" value="#{posController.customerDTO.birthDate}" changeMonth="true" changeYear="true" required="true"/>
+                            <p:message for="birth"/>
+                        </b:formGroup>
+                    </b:column>
+                    <b:column colMd="6">
+                        <b:formGroup>
+                            <p:outputLabel value="Gender"/>
+                            <p:selectOneRadio id="gender" value="#{posController.customerDTO.gender}" required="true">
+                                <f:selectItem itemLabel="Male" itemValue="MALE"/>
+                                <f:selectItem itemLabel="Female" itemValue="FEMALE"/>
+                            </p:selectOneRadio>
+                            <p:message for="gender"/>
+                        </b:formGroup>
+                    </b:column>
+                </b:row>
+               </h:panelGrid>
+                <f:facet name="footer">
+                    <b:commandButton icon="glyphicon-remove" look="danger" onclick="PF('customer-dialog').hide();" update="form-customer:customer-info">
+                        <p:ajax resetValues="true"/>
+                    </b:commandButton>
+                    <p:commandButton type="submit" autofocus="true" id="save" value="Save" styleClass="pull-right btn-primary" update="form-customer:customer-info" look="primary" actionListener="#{posController.saveCustomer}"/>
+                </f:facet>
+            </p:dialog>
+        </b:form>
+        <b:form id="form-invoice">
+            <p:dialog id="dlgInvoice" widgetVar="invoice-dialog" showEffect="drop" resizable="false" modal="true" width="440" height="650">
+                <div style="font-family: monospace ;margin: 0;padding:0; width: 400px; text-align: center; font-size: 13px">
+                    <div style="align-content: center;">
+                        <h1 style="font-size: 35px">FreePOS</h1>
+                        <strong><p style="margin-top: -18; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif; font-size: 15px">Mejor calidad al mejor Precio</p></strong>
+                        <div style="text-align: left; margin: 20px; margin-top: 25px">
+                            <p>
+                                FREEPOS - Calle Bonaire #246 Alma Rosa I
+                                <br/>
+                                TEL: 849-458-0711  * RNC 101-602465
+                                <br/>
+                                <br/>
+                                ORDER #: 0033829
+                                <br/>
+                                NCF:
+                                <br/>
+                                CLIENTE: #{posController.paymentDetails.customerName}
+                            </p>
+                            <p>----------------------------------------------</p>
+                            <table width="400px" style="text-align: left">
+                                <tr>
+                                    <th width="50%">Description</th>
+                                    <th width="20%">ITBIS</th>
+                                    <th width="30%">VALOR</th>
+                                </tr>
+                                <p:repeat value="#{posController.items}" var="item">
+                                    <tr>
+                                        <td>#{item.quantity} #{item.name}</td>
+                                        <td>#{item.itbis}</td>
+                                        <td>#{item.total}</td>
+                                    </tr>
+                                </p:repeat>
+                            </table>
+                            <p>----------------------------------------------</p>
+                            <table width="400px" style="text-align: left">
+                                <tr>
+                                    <th width="50%">DESCUENTO</th>
+                                    <th width="20%">0.00</th>
+                                    <th width="30%">0.00</th>
+                                </tr>
+                                <tr>
+                                    <th width="50%">TOTAL A PAGAR</th>
+                                    <th width="20%">0.00</th>
+                                    <th width="30%">#{posController.paymentDetails.total}</th>
+                                </tr>
+                                <tr>
+                                    <td width="50%">EFECTIVO</td>
+                                    <td width="20%"></td>
+                                    <td width="30%">0.00</td>
+                                </tr>
+                                <tr>
+                                    <td width="50%">-</td>
+                                    <td width="20%"></td>
+                                    <td width="30%"></td>
+                                </tr>
+                                <tr>
+                                    <td width="50%">CAMBIO</td>
+                                    <td width="20%"></td>
+                                    <td width="30%">0.00</td>
+                                </tr>
+                            </table>
+                            <div style="text-align: center; margin-top: 15px">
+                                <span style="font-weight: bold">12/10/18 13:25:22</span>
+                            </div>
+                            <p>LE ATENDIO: JORGE L. MORLA</p>
+                            <p>----------------------------------------------</p>
+                            <div style="text-align: center">
+                                <span style="font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif">Powered by <a href="#">freepos.com</a></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <f:facet name="footer">
+                    <b:commandButton value="Close" onclick="PF('invoice-dialog').hide();" update="form-customer:customer-info">
+                        <p:ajax resetValues="true"/>
+                    </b:commandButton>
+                    <p:commandButton value="Print" styleClass="pull-right btn-primary" update="form-customer:customer-info" look="primary" />
+                </f:facet>
+            </p:dialog>
+        </b:form>
+    </ui:define>
+
+</ui:composition>

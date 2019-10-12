@@ -1,0 +1,95 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:b="http://bootsfaces.net/ui"
+                template="/WEB-INF/template/template.xhtml">
+
+    <f:view>
+        <f:metadata>
+            <f:viewAction action="#{listCustomersController.initNew}" onPostback="false"/>
+        </f:metadata>
+    </f:view>
+    <ui:define name="content">
+        <div class="content-wrapper">
+            <section class="content-header">
+                <h1>Customers<small>View customers</small></h1>
+                <ol class="breadcrumb">
+                    <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
+                    <li class="active">Customers</li>
+                </ol>
+            </section>
+            <section class="content container-fluid">
+                <p:panel>
+                   <b:row>
+                       <b:column>
+                           <h:form>
+                               <p:panelGrid>
+                                   <b:button styleClass="fa fa- pull-right" style="border-radius: 2px; margin-bottom: 10px; font-family: inherit;" look="primary" tooltip="Add Customer" href="/customers/add/" value="Add new Customer"/>
+                               </p:panelGrid>
+                           </h:form>
+                       </b:column>
+                       <b:column>
+                           <h:form id="customer-form">
+                               <h:panelGrid id="grid" cellpadding="5" columns="2"
+                                            style="margin-bottom:10px">
+
+                                   <p:dataTable var="customer" value="#{listCustomersController.customers}" rows="15" paginator="true"
+                                                paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+                                                rowsPerPageTemplate="5,10,15, 50, 100">
+
+                                       <p:column headerText="Customer Name">
+                                           <h:outputText value="#{customer.fullName}" />
+                                       </p:column>
+
+                                       <p:column headerText="Social Id or RNC">
+                                           <h:outputText value="#{customer.socialId}" />
+                                       </p:column>
+
+                                       <p:column headerText="Phone Number">
+                                           <h:outputText value="#{customer.phoneNumber}" />
+                                       </p:column>
+
+                                       <p:column headerText="Email">
+                                           <h:outputText value="#{customer.email}" />
+                                       </p:column>
+
+                                       <p:column headerText="Gender">
+                                           <b:label value="#{customer.gender}" severity="#{customer.gender=='MALE'?'primary':'danger'}"/>
+                                       </p:column>
+
+                                       <p:column width="7%">
+                                           <b:commandLink icon="glyphicon-edit" style="padding-right: 15px;" tooltip="Ver" href="/customers/view/#{customer.id}/"/>
+                                           <b:commandLink icon="glyphicon-trash" tooltip="Eliminar" style="color: red;" oncomplete="PF('remove-dialog').show()" actionListener="#{listCustomersController.onRemove(customer.id)}" update="remove-form"/>
+                                       </p:column>
+
+                                   </p:dataTable>
+                               </h:panelGrid>
+                           </h:form>
+                       </b:column>
+                   </b:row>
+                </p:panel>
+            </section>
+        </div>
+        <h:form id="remove-form">
+            <p:dialog id="remove-dialog" widgetVar="remove-dialog" width="600" modal="true" resizable="false" showEffect="drop">
+                <f:facet name="header">
+                    <h3>Remove Customer</h3>
+                </f:facet>
+                <div style="font-size: 20px">
+                    <div>
+                        <h:outputText value="Are you sure to remove this customer"/>
+                    </div>
+                    <div class="form-group" style="padding-top: 40px">
+                        <p:separator/>
+                        <p:commandButton value="Cancel" styleClass="btn btn-default pull-left" oncomplete="PF('remove-dialog').hide()"/>
+                        <p:commandButton value="Remove" styleClass="btn btn-danger pull-right"
+                                         oncomplete="PF('remove-dialog').hide()" actionListener="#{listCustomersController.removeCustomer}" update="customer-form"/>
+                    </div>
+                </div>
+            </p:dialog>
+        </h:form>
+    </ui:define>
+
+</ui:composition>

@@ -1,0 +1,211 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:b="http://bootsfaces.net/ui"
+	xmlns:P="http://java.sun.com/jsf/html"
+	template="/WEB-INF/template/template.xhtml">
+
+	<f:view>
+		<f:metadata>
+			<f:viewAction action="#{listProductController.initNew}" />
+		</f:metadata>
+	</f:view>
+
+	<ui:define name="content">
+		<div class="content-wrapper">
+			<section class="content-header">
+				<h1>Products</h1>
+				<ol class="breadcrumb">
+					<li><a href="/dashboard/dashboard.xhtml"><i class="fa fa-dashboard"></i>
+							Home</a></li>
+					<li class="active">Dashboard</li>
+				</ol>
+			</section>
+			<section class="content container-fluid">
+				<h:form id="table-form">
+
+						<h:panelGrid id="grid" cellpadding="5" columns="2"
+							style="margin-bottom:10px">
+
+							<p:dataTable id="produt" var="pro" value="#{listProductController.list}"
+								rows="10" paginator="true"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								rowsPerPageTemplate="5,10,15">
+								<p:column headerText="Id">
+									<h:outputText value="#{pro.id}" />
+								</p:column>
+
+								<p:column headerText="Nombre del Producto">
+									<h:outputText value="#{pro.name}" />
+								</p:column>
+
+								<p:column headerText="Marca">
+									<h:outputText value="#{pro.brand}" />
+								</p:column>
+
+								<p:column headerText="Precio Venta">
+									<h:outputText value="#{pro.salePrice}" />
+								</p:column>
+
+								<p:column headerText="Stock">
+									<h:outputText value="#{pro.stocks}" />
+								</p:column>
+
+								<p:column headerText="Category">
+									<b:label value="#{pro.category.name}" severity="primary" />
+								</p:column>
+
+								<p:column headerText="ITBIS">
+									<h:outputText value="#{pro.itbis}" />
+								</p:column>
+
+								<p:column>
+									<b:commandLink icon="glyphicon-edit"
+										style="padding-right: 15px;" tooltip="Editar"
+										actionListener="#{productsController.buscarProductoPorId(pro.id)}"
+										oncomplete="PF('dialogoEditar').show();" update=":edit-form" />
+
+									<b:commandLink icon="glyphicon-trash" tooltip="Eliminar"
+										style="color: red;" oncomplete="PF('dialogDelete').show();"
+										actionListener="#{productsController.buscarProductoPorId(pro.id)}"
+										update=":form-delete" />
+										
+								</p:column>
+
+							</p:dataTable>
+						</h:panelGrid>
+
+				</h:form>
+
+				<b:form id="edit-form">
+					<p:dialog id="dlgEditar" widgetVar="dialogoEditar"
+						showEffect="drop" header="Productos" resizable="false"
+						modal="true" height="470" width="700">
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+								<P:outputLabel value="Nombre del producto:" />
+								<b:inputText value="#{productsController.product.name}" />
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+								<P:outputLabel value="Marca del producto:" />
+								<b:inputText value="#{productsController.product.brand}" />
+							</b:formGroup>
+						</b:row>
+
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+								<P:outputLabel value="Codigo de barra:" />
+								<b:inputText value="#{productsController.product.barcode}" />
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+								<P:outputLabel value="Precio al consto:" />
+								<b:inputText value="#{productsController.product.purchasePrice}" />
+							</b:formGroup>
+						</b:row>
+
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="Precio de venta:" />
+
+								<b:inputText value="#{productsController.product.salePrice}" />
+
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="Stock:" />
+
+								<b:inputText value="#{productsController.product.stocks}" />
+
+							</b:formGroup>
+						</b:row>
+
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="ITBIS:" />
+
+								<b:inputText value="#{productsController.product.itbis}" />
+
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="Categoria:" />
+
+								<b:inputText value="#{productsController.product.category.name}" />
+
+							</b:formGroup>
+						</b:row>
+
+
+						<b:row>
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="Proveedor:" />
+
+								<b:inputText
+									value="#{productsController.product.providers.providerName}" />
+
+							</b:formGroup>
+
+							<b:formGroup styleClass="col-md-6">
+
+								<P:outputLabel value="Descripcion:" />
+
+								<b:inputTextarea
+									value="#{productsController.product.description}" />
+
+							</b:formGroup>
+						</b:row>
+
+						<f:facet name="footer">
+							<b:commandButton icon="glyphicon-remove" look="danger"
+								tooltip="Cancelar" onclick="PF('dialogoEditar').hide();" />
+
+							<b:commandButton icon="glyphicon-save" look="primary"
+								styleClass="pull-right" tooltip="Actualizar"
+								oncomplete="PF('dialogoEditar').hide();"
+								actionListener="#{productsController.actualizar}" 
+								update=":table-form"/>
+						</f:facet>
+					</p:dialog>
+				</b:form>
+
+				<b:form id="form-delete">
+					<p:dialog id="dlgDelete" widgetVar="dialogDelete" showEffect="drop"
+						resizable="false" modal="true" width="600">
+
+						<f:facet name="header">
+							<h3>Remove Product</h3>
+						</f:facet>
+
+						<div style="font-size: 20px">
+							<div>
+								<h:outputText value="Desea eliminar este producto?" />
+							</div>
+							<div class="form-group" style="padding-top: 40px">
+								<p:separator />
+								<b:commandButton  value="No"
+									 onclick="PF('dialogDelete').hide();" />
+
+								<b:commandButton icon="glyphicon-remove" look="danger"
+									styleClass="pull-right" value="Si"
+									oncomplete="PF('dialogDelete').hide();"
+									actionListener="#{productsController.eliminar}"
+									update="table-form"/>
+							</div>
+						</div>
+
+
+
+					</p:dialog>
+				</b:form>
+			</section>
+		</div>
+	</ui:define>
+</ui:composition>
